@@ -1,0 +1,160 @@
+{
+  "taichi": "../taichi.json",
+  "annotation": {
+    "author": "captain_cc_2008@163.com",
+    "date": "2017年1月31日",
+    "func": "数据加工配置"
+  },
+  "sparkConf": [
+    {
+      "spark.driver.memory": "1g"
+    },
+    {
+      "spark.executor.cores": "4"
+    },
+    {
+      "spark.executor.instances": "2"
+    },
+    {
+      "spark.executor.memory": "1g"
+    },
+    {
+      "spark.yarn.executor.memoryOverhead": "1g"
+    },
+    {
+      "conf spark.default.parallelism": "50"
+    },
+    {
+      "conf spark.sql.shuffle.partitions": "10"
+    },
+    {
+      "spark.cores.max": "200"
+    }
+  ],
+  "common": [
+    {
+      "BASE_FILE_NAME": "user_info"
+    },
+    {
+      "BASE_FILE_PATH": "/usr/cdp"
+    },
+    {
+      "SOURCE_T1_FILE_PATH": "${CDP_HOME}/"
+    },
+    {
+      "SOURCE_T1_FILE_NAME": "${BASE_FILE_NAME}"
+    },
+    {
+      "TARGET_FILE_PATH": "${CDP_HOME}/target"
+    },
+    {
+      "TARGET_FILE_NAME": "${BASE_FILE_NAME}"
+    }
+  ],
+  "process": [
+    {
+      "clazz": "${TextLoad}",
+      "filePath": "${SOURCE_T1_FILE_PATH}/data/",
+      "fileName": "${BASE_FILE_NAME}.txt",
+      "split": "\\|",
+      "tableName": "TMP_TBL_01",
+      "rddName": "RDD_TBL_01",
+      "partitionNum": "1",
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "STRING",
+          "desc": "用户编号"
+        },
+        {
+          "name": "user_name",
+          "type": "STRING",
+          "desc": "用户姓名"
+        },
+        {
+          "name": "user_age",
+          "type": "STRING",
+          "desc": "用户年龄"
+        }
+      ]
+    },
+    {
+      "clazz": "${HdfsCmd}",
+      "flag": "false",
+      "cmd": "rm ${TARGET_FILE_PATH}"
+    },
+    {
+      "clazz": "${SysCmd}",
+      "flag": "false",
+      "cmd": "ls -l"
+    },
+    {
+      "clazz": "${SqlTransfer}",
+      "flag": "true",
+      "show": "true",
+      "tableName": "TMP_TBL_02",
+      "rddName": "RDD_TBL_02",
+      "sql": "select user_id,user_name,user_age from TMP_TBL_01"
+    },
+    {
+      "clazz": "${SqlTransfer}",
+      "annotation": "UDTF示例",
+      "sql": "create temporary function UDTFSample as 'com.captain.bigdata.taichi.process.udf.UDTFSample'"
+    },
+    {
+      "clazz": "${SqlTransfer}",
+      "flag": "true",
+      "show": "true",
+      "tableName": "TMP_TBL_022",
+      "sql": "select user_id,user_name,user_age,column1, column2,column3 from TMP_TBL_01 LATERAL VIEW UDTFSample(user_id,user_name) as column1, column2,column3"
+    },
+    {
+      "clazz": "${SqlTransfer}",
+      "annotation": "UDF示例",
+      "sql": "create temporary function UDFSample as 'com.captain.bigdata.taichi.process.udf.UDFSample'"
+    },
+    {
+      "clazz": "${SqlTransfer}",
+      "flag": "true",
+      "show": "true",
+      "tableName": "TMP_TBL_023",
+      "sql": "select user_id,user_name,user_age,UDFSample(user_id) as user_id2 from TMP_TBL_01"
+    },
+    {
+      "clazz": "${TextSave}",
+      "flag": "false",
+      "filePath": "${TARGET_FILE_PATH}/text/${BASE_DATE}",
+      "fileName": "${BASE_FILE_NAME}_text",
+      "tableName": "TMP_TBL_03",
+      "split": "#",
+      "sql": "select user_id,user_name,user_age from TMP_TBL_01"
+    },
+    {
+      "clazz": "${ParquetSave}",
+      "flag": "false",
+      "filePath": "${TARGET_FILE_PATH}/parquet/${BASE_DATE}/",
+      "fileName": "${BASE_FILE_NAME}_parquet",
+      "tableName": "TMP_TBL_04",
+      "sql": "select user_id,user_name,user_age from TMP_TBL_01"
+    },
+    {
+      "clazz": "${OrcSave}",
+      "flag": "false",
+      "filePath": "${TARGET_FILE_PATH}/orc/${BASE_DATE}/",
+      "fileName": "${BASE_FILE_NAME}_orc",
+      "tableName": "TMP_TBL_05",
+      "sql": "select * from TMP_TBL_01"
+    },
+    {
+      "clazz": "${CustomProcess}"
+    },
+    {
+      "clazz": "${StressProcessSimpleGet}",
+      "flag": "false",
+      "url": "http://127.0.0.1:8080/test?username=captain",
+      "groupNum": "2",
+      "cycleNum": "10",
+      "threadNum": "2"
+    }
+  ]
+}
