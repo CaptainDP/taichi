@@ -15,7 +15,7 @@ import org.apache.spark.SparkConf
   * @date 2017/1/26 9:56
   * @func 数据处理主入口
   */
-object taichi extends Logging {
+object TaichiApp extends Logging {
 
   def main(args: Array[String]): Unit = {
 

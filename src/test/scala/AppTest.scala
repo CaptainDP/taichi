@@ -1,4 +1,4 @@
-import com.captain.bigdata.taichi.taichi
+import com.captain.bigdata.taichi.TaichiApp
 
 /**
   * AppTest
@@ -14,7 +14,7 @@ object AppTest {
     val path = this.getClass.getResource("/").getPath
     val jsonParam = "{\"CDP_HOME\":\"" + path + "\"}"
 
-    taichi.main(Array("20170101", "/conf/test_process.json", jsonParam))
+    TaichiApp.main(Array("20170101", "/conf/test_process.json", jsonParam))
 
   }
 
