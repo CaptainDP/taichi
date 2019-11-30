@@ -11,10 +11,8 @@ object AppTest {
 
   def main(args: Array[String]): Unit = {
 
-    val path = this.getClass.getResource("/").getPath
-    val jsonParam = "{\"CDP_HOME\":\"" + path + "\"}"
-
-    TaichiApp.main(Array("20170101", "/conf/test_process.json", jsonParam))
+    val args2 = Array[String]("-d", "20190101", "-cf", "./src/test/resources/conf/test_process.json")
+    TaichiApp.main(args2)
 
   }
 

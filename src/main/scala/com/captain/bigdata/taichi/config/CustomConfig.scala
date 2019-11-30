@@ -1,11 +1,10 @@
 package com.captain.bigdata.taichi.config
 
 import java.io.File
-import java.util.Date
 
-import com.captain.bigdata.taichi.bean.CustomBean
+import com.captain.bigdata.taichi.bean.{ArgsBean, CustomBean}
 import com.captain.bigdata.taichi.log.Logging
-import com.captain.bigdata.taichi.util.{JsonUtil, StringUtil, UrlUtil}
+import com.captain.bigdata.taichi.util.{FileUtil, JsonUtil, StringUtil, UrlUtil}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -19,11 +18,10 @@ import scala.collection.mutable.ArrayBuffer
   * @date 2017/1/30 16:24
   * @func
   */
-class CustomConfig(date: Date, confFile: String, jsonParam: String) extends taichiConfig with Logging {
+class CustomConfig(argsBean: ArgsBean) extends TaichiConfig with Logging {
 
-  val url = UrlUtil.get(confFile)
-  val customConfig = JsonUtil.getBeanFromUrl(url, classOf[CustomBean])
-  val taichi = customConfig.taichi
+  val customConfig = getCustomConfig(argsBean)
+  val customTaichiFile = customConfig.taichi
   val customAnnotation = customConfig.annotation
   val sparkConf = customConfig.sparkConf
   val common = customConfig.common
@@ -31,51 +29,69 @@ class CustomConfig(date: Date, confFile: String, jsonParam: String) extends taic
   val sparkConfMap = mutable.LinkedHashMap[String, String]()
   var processList = ArrayBuffer[Map[String, String]]()
 
-  var path = new File(taichi).toURI.toURL.toString
-
-  if (taichi.startsWith(".")) {
-    val parentPath = new File(url.toString).getParent
-    path = parentPath + "/" + taichi
-  }
-
-  val commomConf = new taichiConfig().init(date, path, jsonParam)
+  val commomConf = new TaichiConfig().init(customTaichiFile, argsBean)
   baseMap = commomConf.baseMap
 
-  for (entry <- customAnnotation.entrySet) {
-    val key = entry.getKey.toString
-    val value = entry.getValue.toString
-    logger.info(key + " -> " + value)
-  }
-
-  for (map <- sparkConf) {
-    for (entry <- map.entrySet) {
+  if (null != customAnnotation) {
+    for (entry <- customAnnotation.entrySet) {
       val key = entry.getKey.toString
       val value = entry.getValue.toString
-      logger.info(key + ": " + value)
-      sparkConfMap(key) = value
+      logger.info(key + " -> " + value)
     }
   }
 
-  for (map <- common) {
-    for (entry <- map.entrySet) {
-      val key = entry.getKey.toString
-      val value = entry.getValue.toString
-      val newValue = StringUtil.stringReplace(value, baseMap)
-      logger.info(key + ": " + value + " -> " + newValue)
-      baseMap(key) = newValue
+  if (null != sparkConf) {
+    for (map <- sparkConf) {
+      for (entry <- map.entrySet) {
+        val key = entry.getKey.toString
+        val value = entry.getValue.toString
+        logger.info(key + ": " + value)
+        sparkConfMap(key) = value
+      }
     }
   }
 
-  for (map <- process) {
-    var tmp = Map[String, String]()
-    for (entry <- map.entrySet) {
-      val key = entry.getKey.toString
-      val value = entry.getValue.toString
-      val newValue = StringUtil.stringReplace(value, baseMap)
-      logger.info(key + ": " + value + " -> " + newValue)
-      tmp += (key -> newValue)
+  if (null != common) {
+    for (map <- common) {
+      for (entry <- map.entrySet) {
+        val key = entry.getKey.toString
+        val value = entry.getValue.toString
+        val newValue = StringUtil.stringReplace(value, baseMap)
+        logger.info(key + ": " + value + " -> " + newValue)
+        baseMap(key) = newValue
+      }
     }
-    processList += tmp
+  }
+
+  if (null != process) {
+    for (map <- process) {
+      var tmp = Map[String, String]()
+      for (entry <- map.entrySet) {
+        val key = entry.getKey.toString
+        val value = entry.getValue.toString
+        val newValue = StringUtil.stringReplace(value, baseMap)
+        logger.info(key + ": " + value + " -> " + newValue)
+        tmp += (key -> newValue)
+      }
+      processList += tmp
+    }
+  }
+
+  def getCustomConfig(argsBean: ArgsBean) = {
+
+    var customerJson = argsBean.customerJson
+
+    if (argsBean.customerJson == null || argsBean.customerJson.trim.equals("")) {
+      val url = UrlUtil.get(argsBean.customerFile)
+      logger.info("customerJsonPath=" + url)
+      customerJson = FileUtil.readFileAll(url)
+      val parentPath = new File(url.toURI).getParent
+      argsBean.customerPath = parentPath
+    }
+
+    val customConfig = JsonUtil.getBeanFromJson(customerJson, classOf[CustomBean])
+    customConfig
+
   }
 
 }

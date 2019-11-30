@@ -24,7 +24,7 @@ object UrlUtil extends Logging {
     * @param inputFileName
     * @return
     */
-  def get(inputFileName: String): URL = {
+  def get(inputFileName: String, customerPath: String = "."): URL = {
 
     if (null == inputFileName) {
       throw new AppException("inputFileName is null")
@@ -32,6 +32,7 @@ object UrlUtil extends Logging {
 
     var fileName = inputFileName
     var url: URL = null
+    var p: URL = null
 
     if (Constants.CLUSTER_MODE) {
       var index = fileName.lastIndexOf("/").max(fileName.lastIndexOf("\\"))
@@ -45,12 +46,25 @@ object UrlUtil extends Logging {
       logger.info("cluster mode inputFileName=[" + inputFileName + "] to [" + fileName + "]")
     }
 
-    var p = new File("").toURI.toURL
-    logger.info("try load 1 file in relative path " + p + " or absolute path")
+    if (inputFileName.startsWith(".")) {
+      logger.info("try load 0 file in customer path " + customerPath + " or absolute path")
+      val f = customerPath + "/" + inputFileName
+      val path = Paths.get(f)
+      if (Files.exists(path)) {
+        url = new File(f).toURI.toURL
+      }
+    }
 
-    val path = Paths.get(fileName)
-    if (Files.exists(path)) {
-      url = new File(fileName).toURI.toURL
+    if (url == null) {
+
+      p = new File("").toURI.toURL
+
+      logger.info("try load 1 file in relative path " + p + " or absolute path")
+
+      val path = Paths.get(fileName)
+      if (Files.exists(path)) {
+        url = new File(fileName).toURI.toURL
+      }
     }
 
     if (url == null) {

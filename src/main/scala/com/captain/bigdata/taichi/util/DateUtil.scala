@@ -39,6 +39,18 @@ object DateUtil extends Logging {
   }
 
   /**
+    * 获取昨天
+    *
+    * @param targetFormat
+    * @return
+    */
+  def getYesterday(targetFormat: String = "yyyyMMdd"): String = {
+    val now = new DateTime()
+    val dateTime = new DateTime(now.minusDays(1).toDate)
+    dateTime.toString(targetFormat)
+  }
+
+  /**
     * 获取时间戳
     *
     * @param date

@@ -1,11 +1,13 @@
 package com.captain.bigdata.taichi
 
-import com.captain.bigdata.taichi.config.CustomConfig
+import com.captain.bigdata.taichi.bean.ArgsBean
+import com.captain.bigdata.taichi.config.{CustomConfig, TaichiConfig}
 import com.captain.bigdata.taichi.constant.Constants
 import com.captain.bigdata.taichi.exception.AppException
 import com.captain.bigdata.taichi.log.Logging
 import com.captain.bigdata.taichi.spark.Spark
-import com.captain.bigdata.taichi.util.{ClassUtil, DateUtil}
+import com.captain.bigdata.taichi.util.{ClassUtil, DateUtil, FileUtil, UrlUtil}
+import org.apache.commons.cli._
 import org.apache.spark.SparkConf
 
 /**
@@ -24,7 +26,10 @@ object TaichiApp extends Logging {
     logger.info("----------------------taichi start-----------------------")
 
     try {
+      logger.info("args=" + args.toList)
+
       doProcess(args)
+
       flag = true
     } catch {
       case e: AppException => logger.error("AppException", e)
@@ -44,23 +49,72 @@ object TaichiApp extends Logging {
     }
   }
 
+  def getArgs(args: Array[String]): ArgsBean = {
+
+    val options = new Options
+    options.addOption("d", true, "date yyyyMMdd [default yesterday]")
+    options.addOption("a", true, "addition json")
+
+    val customerGroup = new OptionGroup
+    customerGroup.addOption(new Option("cf", true, "customer file"))
+    customerGroup.addOption(new Option("cs", true, "customer json"))
+    customerGroup.setRequired(true)
+    options.addOptionGroup(customerGroup)
+
+    val taichiGroup = new OptionGroup
+    taichiGroup.addOption(new Option("pf", true, "taichi file [default taichi.json in jar]"))
+    taichiGroup.addOption(new Option("ps", true, "taichi json [default taichi.json in jar]"))
+    options.addOptionGroup(taichiGroup)
+
+    val parser = new BasicParser
+
+    var date = DateUtil.toDate(DateUtil.getYesterday())
+    var additionJson = ""
+    var customerJson = ""
+    var customerFile = ""
+    var taichiFile = ""
+    var taichiJson: String = null
+
+    try {
+      val cmd = parser.parse(options, args)
+
+      //date
+      if (cmd.hasOption("d")) {
+        val dt = cmd.getOptionValue("d")
+        date = DateUtil.toDate(dt)
+      }
+
+      //customer
+      if (cmd.hasOption("cf")) {
+        val cf = cmd.getOptionValue("cf")
+        customerFile = cf
+      } else {
+        customerJson = cmd.getOptionValue("cs")
+      }
+
+      //taichi
+      if (cmd.hasOption("pf")) {
+        val pf = cmd.getOptionValue("pf")
+        taichiFile = pf
+      } else if (cmd.hasOption("ps")) {
+        taichiJson = cmd.getOptionValue("ps")
+      }
+
+    } catch {
+      case e: AppException =>
+        val formatter = new HelpFormatter
+        formatter.printHelp("java com.captain.bigdata.taichi.TaichiApp", options)
+        throw e;
+    }
+
+    ArgsBean(date, additionJson, customerJson, taichiJson, customerFile, taichiFile, ".")
+  }
+
   def doProcess(args: Array[String]): Unit = {
 
-    if (args.length < 2) {
-      println("usage:com.captain.bigdata.taichi.taichi.main date confFile [jsonParam]")
-      System.exit(1)
-    }
+    val argsBean = getArgs(args)
 
-    val dt = args(0)
-    val confFile = args(1)
-    var jsonParam = "{}"
-    if (args.length >= 3) {
-      jsonParam = args(2)
-    }
-
-    val date = DateUtil.toDate(dt)
-
-    logger.info("confFile=" + confFile + ",date=" + dt + ",jsonParam=" + jsonParam)
+    logger.info("argsBean=" + argsBean.toString)
 
     val conf = new SparkConf()
     val master = conf.get("spark.master", null)
@@ -73,7 +127,7 @@ object TaichiApp extends Logging {
     logger.info("Constants.CLUSTER_MODE=" + Constants.CLUSTER_MODE)
 
     //init conf
-    val customConfig = new CustomConfig(date, confFile, jsonParam)
+    val customConfig = new CustomConfig(argsBean)
     logger.info("config init ok")
 
     //init spark

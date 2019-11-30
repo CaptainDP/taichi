@@ -27,8 +27,8 @@ object JsonUtil {
     new Gson().fromJson(reader, clazz)
   }
 
-  def getBeanFromFile[T](fileName: String, clazz: Class[T]): T = {
-    val url = UrlUtil.get(fileName)
+  def getBeanFromFile[T](fileName: String, clazz: Class[T], customerPath: String = "."): T = {
+    val url = UrlUtil.get(fileName, customerPath)
     val reader = new JsonReader(new FileReader(url.getFile))
     new Gson().fromJson(reader, clazz)
   }
