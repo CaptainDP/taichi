@@ -24,7 +24,7 @@ object UrlUtil extends Logging {
     * @param inputFileName
     * @return
     */
-  def get(inputFileName: String, customerPath: String = "."): URL = {
+  def get(inputFileName: String, customerPath: String = ""): URL = {
 
     if (null == inputFileName) {
       throw new AppException("inputFileName is null")
@@ -47,11 +47,13 @@ object UrlUtil extends Logging {
     }
 
     if (inputFileName.startsWith(".")) {
-      logger.info("try load 0 file in customer path " + customerPath + " or absolute path")
-      val f = customerPath + "/" + inputFileName
-      val path = Paths.get(f)
-      if (Files.exists(path)) {
-        url = new File(f).toURI.toURL
+      if (customerPath != null && !customerPath.trim.equals("")) {
+        logger.info("try load 0 file in customer path " + customerPath + " or absolute path")
+        val f = customerPath + "/" + inputFileName
+        val path = Paths.get(f)
+        if (Files.exists(path)) {
+          url = new File(f).toURI.toURL
+        }
       }
     }
 

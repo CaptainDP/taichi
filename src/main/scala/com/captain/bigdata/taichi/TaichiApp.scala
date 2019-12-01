@@ -107,7 +107,7 @@ object TaichiApp extends Logging {
         throw e;
     }
 
-    ArgsBean(date, additionJson, customerJson, taichiJson, customerFile, taichiFile, ".")
+    ArgsBean(date, additionJson, customerJson, taichiJson, customerFile, taichiFile, "")
   }
 
   def doProcess(args: Array[String]): Unit = {
