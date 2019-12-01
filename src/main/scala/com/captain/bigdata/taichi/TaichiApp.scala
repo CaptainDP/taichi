@@ -1,12 +1,12 @@
 package com.captain.bigdata.taichi
 
 import com.captain.bigdata.taichi.bean.ArgsBean
-import com.captain.bigdata.taichi.config.{CustomConfig, TaichiConfig}
+import com.captain.bigdata.taichi.config.CustomConfig
 import com.captain.bigdata.taichi.constant.Constants
 import com.captain.bigdata.taichi.exception.AppException
 import com.captain.bigdata.taichi.log.Logging
 import com.captain.bigdata.taichi.spark.Spark
-import com.captain.bigdata.taichi.util.{ClassUtil, DateUtil, FileUtil, UrlUtil}
+import com.captain.bigdata.taichi.util.{ClassUtil, DateUtil}
 import org.apache.commons.cli._
 import org.apache.spark.SparkConf
 
