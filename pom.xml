@@ -19,6 +19,33 @@
         <spark.version>2.3.0</spark.version>
     </properties>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <licenses>
+        <license>
+            <name>Apache License Version 2.0, January 2004</name>
+            <url>http://www.apache.org/licenses/</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <tag>master</tag>
+        <url>https://github.com/CaptainDP/taichi.git</url>
+        <connection>scm:git:https://github.com/CaptainDP/taichi.git</connection>
+        <developerConnection>scm:git:https://github.com/CaptainDP/taichi.git</developerConnection>
+    </scm>
+    <developers>
+        <developer>
+            <name>CaptainDP</name>
+            <email>captain_cc_2008@163.com</email>
+            <organization>individual</organization>
+        </developer>
+    </developers>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.spark</groupId>
