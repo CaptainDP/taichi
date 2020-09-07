@@ -94,7 +94,7 @@ class TaichiConfig extends Logging {
 
     var additionMap = new util.HashMap[String, String]()
 
-    if (argsBean.additionJson == null || argsBean.additionJson.trim.equals("")) {
+    if (argsBean.additionJson != null && !argsBean.additionJson.trim.equals("")) {
       additionMap = JsonUtil.getBeanFromJson(argsBean.additionJson, classOf[util.HashMap[String, String]])
     }
 

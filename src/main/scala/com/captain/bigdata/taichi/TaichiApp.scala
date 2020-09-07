@@ -51,6 +51,10 @@ object TaichiApp extends Logging {
 
   def getArgs(args: Array[String]): ArgsBean = {
 
+    if (args != null && args.length > 0) {
+      logger.info("argsStr=[" + args.mkString(" ") + "]")
+    }
+
     val options = new Options
     options.addOption("d", true, "date yyyyMMdd [default yesterday]")
     options.addOption("a", true, "addition json")
@@ -66,7 +70,7 @@ object TaichiApp extends Logging {
     taichiGroup.addOption(new Option("ps", true, "taichi json [default taichi.json in jar]"))
     options.addOptionGroup(taichiGroup)
 
-    val parser = new BasicParser
+    val parser = new DefaultParser
 
     var date = DateUtil.toDate(DateUtil.getYesterday())
     var additionJson = ""
@@ -82,6 +86,11 @@ object TaichiApp extends Logging {
       if (cmd.hasOption("d")) {
         val dt = cmd.getOptionValue("d")
         date = DateUtil.toDate(dt)
+      }
+
+      //addition
+      if (cmd.hasOption("a")) {
+        additionJson = cmd.getOptionValue("a")
       }
 
       //customer
