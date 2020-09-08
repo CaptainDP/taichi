@@ -10,6 +10,8 @@ import com.captain.bigdata.taichi.util.{ClassUtil, DateUtil}
 import org.apache.commons.cli._
 import org.apache.spark.SparkConf
 
+import scala.collection.mutable.HashMap
+
 /**
   * taichi
   *
@@ -145,7 +147,7 @@ object TaichiApp extends Logging {
     val context = Spark.context
     logger.info("spark init ok")
 
-    var transferMap = Map[String, Any]()
+    var transferMap = HashMap[String, Any]()
     // process
     for (map <- customConfig.processList) {
       val clazz = map.getOrElse(Constants.CLASS, "com.captain.bigdata.taichi.process.BaseProcess")
@@ -156,7 +158,7 @@ object TaichiApp extends Logging {
       process.context.transferMap = transferMap
       logger.info("before process transferMap=" + transferMap)
       process.execute()
-      transferMap = transferMap ++ process.context.transferMap
+      transferMap ++= process.context.transferMap
     }
 
     logger.info("process all ok")

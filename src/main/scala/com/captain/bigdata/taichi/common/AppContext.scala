@@ -2,6 +2,8 @@ package com.captain.bigdata.taichi.common
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+import scala.collection.mutable
+
 /**
   * AppContext
   *
@@ -29,6 +31,6 @@ class AppContext extends Serializable {
   /**
     * transferMap
     */
-  var transferMap = Map[String, Any]()
+  var transferMap = mutable.HashMap[String, Any]()
 
 }
