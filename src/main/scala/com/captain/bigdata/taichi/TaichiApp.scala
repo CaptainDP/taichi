@@ -82,7 +82,7 @@ object TaichiApp extends Logging {
     var taichiJson: String = null
 
     try {
-      val cmd = parser.parse(options, args)
+      val cmd = parser.parse(options, args, true)
 
       //date
       if (cmd.hasOption("d")) {
